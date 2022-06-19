@@ -5,7 +5,6 @@
  *             Benedikt Wendling
  */
 #include "mbed.h"
-#include <algorithm>
 #include <cstdint>
 
 
@@ -20,15 +19,15 @@
 #define LED_RED2    PB_3
 #define LED_ORANGE2 PB_5
 #define LED_GREEN2  PB_4
-#define SW_1    PA_9
-#define SW_2    PC_7
-#define SW_3    PB_6
-#define SW_4    PA_7
-#define SW_5    PA_6
+#define SW_1        PA_9
+#define SW_2        PC_7
+#define SW_3        PB_6
+#define SW_4        PA_7
+#define SW_5        PA_6
 #define PIN_SERVO   PB_10
 
-#define CYCLE_TIME  10ms // time for each cycle
-#define PRESS_SHORT 50   // in multiples of CYCLE_TIME
+
+#define PRESS_SHORT 50   // in multiples of task period (here 10ms)
 
 #define SERVO_PERIOD_MAX    2100 //in us
 #define SERVO_PERIOD_MIN    1100 //in us
@@ -93,17 +92,15 @@ void vButtonsMemory() {
         // button pressed
         if(counterSW3 < PRESS_SHORT) {
             counterSW3++;
-        } else {
-            if(counterSW3 == PRESS_SHORT) {
-                // long press
-                // set counter to one above short press so this does not get executed one more time
-                counterSW3++;
-                // check if in program mode
-                if(pinSW1 == 1) {
-                    // save servo position
-                    servoPeriodSave[0] = servoPeriod;
-                    pinLedRed2 = 1;
-                }
+        } else if(counterSW3 == PRESS_SHORT) {
+            // long press
+            // set counter to one count above short press so this does not get executed one more time
+            counterSW3++;
+            // check if in program mode
+            if(pinSW1 == 1) {
+                // save servo position
+                servoPeriodSave[0] = servoPeriod;
+                pinLedRed2 = 1;
             }
         }
     } else {
@@ -112,7 +109,7 @@ void vButtonsMemory() {
             // short press detected
             // recall saved position
             servoPeriod = servoPeriodSave[0];
-             pinLedGreen2 = 1;
+            pinLedGreen2 = 1;
         }
         // check if button has been pressed
         if(counterSW3 != 0) {
@@ -127,17 +124,15 @@ void vButtonsMemory() {
         // button pressed
         if(counterSW4 < PRESS_SHORT) {
             counterSW4++;
-        } else {
-            if(counterSW4 == PRESS_SHORT) {
-                // long press
-                // set counter to one above short press so this does not get executed one more time
-                counterSW4++;
-                // check if in program mode
-                if(pinSW1 == 1) {
-                    // save servo position
-                    servoPeriodSave[1] = servoPeriod;
-                    pinLedRed2 = 1;
-                }
+        } else if(counterSW4 == PRESS_SHORT) {
+            // long press
+            // set counter to one above short press so this does not get executed one more time
+            counterSW4++;
+            // check if in program mode
+            if(pinSW1 == 1) {
+                // save servo position
+                servoPeriodSave[1] = servoPeriod;
+                pinLedRed2 = 1;
             }
         }
     } else {
@@ -167,7 +162,7 @@ void vButtonsMemory() {
 // task list
 struct stTask schedulerTasks[] = {
     {vButtonsMemory, 10, 0},
-    {vButtonsPosition, 20, 0}
+    {vButtonsPosition, 15, 0}
 };
 
 void vScheduler() {
