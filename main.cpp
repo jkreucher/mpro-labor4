@@ -27,16 +27,18 @@
 #define SW_5    PA_6
 #define PIN_SERVO   PB_10
 
-#define CYCLE_TIME  10ms
-#define PRESS_SHORT 40
+#define CYCLE_TIME  10ms // time for each cycle
+#define PRESS_SHORT 50   // in multiples of CYCLE_TIME
 
-#define SERVO_PERIOD_MAX    2100
-#define SERVO_PERIOD_MIN    1100
+#define SERVO_PERIOD_MAX    2100 //in us
+#define SERVO_PERIOD_MIN    1100 //in us
 
 
 PwmOut pinServo(PIN_SERVO);
 DigitalOut pinLedOrange1(LED_ORANGE1);
 DigitalOut pinLedOrange2(LED_ORANGE2);
+DigitalOut pinLedRed2(LED_RED2);
+DigitalOut pinLedGreen2(LED_GREEN2);
 DigitalIn pinSW1(SW_1);
 DigitalIn pinSW2(SW_2);
 DigitalIn pinSW3(SW_3);
@@ -55,11 +57,21 @@ void vTasten() {
     // check switch 2
     if(pinSW2 == 1) {
         servoPeriod += 10;
+        pinLedOrange1 = 1;
+        pinLedGreen2 = 0;
+    } else {
+        pinLedOrange1 = 0;
     }
+
     // check switch 5
     if(pinSW5 == 1) {
         servoPeriod -= 10;
+        pinLedOrange2 = 1;
+         pinLedGreen2 = 0;
+    } else {
+        pinLedOrange2 = 0;
     }
+
     // check switch 3
     if(pinSW3 == 1) {
         // button pressed
@@ -70,18 +82,27 @@ void vTasten() {
                 // long press
                 // set counter to one above short press so this does not get executed one more time
                 counterSW3++;
-                // do stuff with long press here
+                // save servo position
                 servoPeriodSave[0] = servoPeriod;
+                pinLedRed2 = 1;
             }
         }
     } else {
         // button not pressed (released)
         if((counterSW3 < PRESS_SHORT) && (counterSW3 != 0)) {
             // short press detected
+            // recall saved position
             servoPeriod = servoPeriodSave[0];
+             pinLedGreen2 = 1;
         }
+        // check if button has been pressed
+        if(counterSW3 != 0) {
+            pinLedRed2 = 0;
+        }
+        // reset switch counter
         counterSW3 = 0;
     }
+
     // check switch 4
     if(pinSW4 == 1) {
         // button pressed
@@ -92,16 +113,24 @@ void vTasten() {
                 // long press
                 // set counter to one above short press so this does not get executed one more time
                 counterSW4++;
-                // do stuff with long press here
+                // save servo position
                 servoPeriodSave[1] = servoPeriod;
+                pinLedRed2 = 1;
             }
         }
     } else {
         // button not pressed (released)
         if((counterSW4 < PRESS_SHORT) && (counterSW4 != 0)) {
             // short press detected
+            // recall saved position
             servoPeriod = servoPeriodSave[1];
+            pinLedGreen2 = 1;
         }
+        // check if button has been pressed
+        if(counterSW4 != 0) {
+             pinLedRed2 = 0;
+        }
+        // reset switch counter
         counterSW4 = 0;
     }
 
